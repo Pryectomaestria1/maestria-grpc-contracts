@@ -10,21 +10,27 @@ import { Observable } from "rxjs";
 
 export const protobufPackage = "user";
 
-export interface ValidateTokenRequest {
-  token: string;
+export interface GetUserProfileRequest {
 }
 
-export interface ValidateTokenResponse {
-  isValid: boolean;
+export interface GetUserProfileResponse {
+  name: string;
+  avatarUrl: string;
+}
+
+export interface GetRoleRequest {
+}
+
+export interface GetRoleResponse {
+  role: string;
+}
+
+export interface SetUserRoleRequest {
   userId: string;
   role: string;
 }
 
-export interface BecomeInstructorRequest {
-  token: string;
-}
-
-export interface BecomeInstructorResponse {
+export interface SetUserRoleResponse {
   success: boolean;
   role: string;
 }
@@ -43,49 +49,39 @@ export interface UserSummary {
   avatarUrl: string;
 }
 
-export interface SyncProfileRequest {
-  userId: string;
-  name: string;
-  avatarUrl: string;
-}
-
-export interface SyncProfileResponse {
-  success: boolean;
-}
-
 export const USER_PACKAGE_NAME = "user";
 
 export interface UserServiceClient {
-  validateToken(request: ValidateTokenRequest): Observable<ValidateTokenResponse>;
+  getUserProfile(request: GetUserProfileRequest): Observable<GetUserProfileResponse>;
 
-  becomeInstructor(request: BecomeInstructorRequest): Observable<BecomeInstructorResponse>;
+  getRole(request: GetRoleRequest): Observable<GetRoleResponse>;
+
+  setUserRole(request: SetUserRoleRequest): Observable<SetUserRoleResponse>;
 
   getUsersByIds(request: GetUsersByIdsRequest): Observable<GetUsersByIdsResponse>;
-
-  syncProfile(request: SyncProfileRequest): Observable<SyncProfileResponse>;
 }
 
 export interface UserServiceController {
-  validateToken(
-    request: ValidateTokenRequest,
-  ): Promise<ValidateTokenResponse> | Observable<ValidateTokenResponse> | ValidateTokenResponse;
+  getUserProfile(
+    request: GetUserProfileRequest,
+  ): Promise<GetUserProfileResponse> | Observable<GetUserProfileResponse> | GetUserProfileResponse;
 
-  becomeInstructor(
-    request: BecomeInstructorRequest,
-  ): Promise<BecomeInstructorResponse> | Observable<BecomeInstructorResponse> | BecomeInstructorResponse;
+  getRole(
+    request: GetRoleRequest,
+  ): Promise<GetRoleResponse> | Observable<GetRoleResponse> | GetRoleResponse;
+
+  setUserRole(
+    request: SetUserRoleRequest,
+  ): Promise<SetUserRoleResponse> | Observable<SetUserRoleResponse> | SetUserRoleResponse;
 
   getUsersByIds(
     request: GetUsersByIdsRequest,
   ): Promise<GetUsersByIdsResponse> | Observable<GetUsersByIdsResponse> | GetUsersByIdsResponse;
-
-  syncProfile(
-    request: SyncProfileRequest,
-  ): Promise<SyncProfileResponse> | Observable<SyncProfileResponse> | SyncProfileResponse;
 }
 
 export function UserServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["validateToken", "becomeInstructor", "getUsersByIds", "syncProfile"];
+    const grpcMethods: string[] = ["getUserProfile", "getRole", "setUserRole", "getUsersByIds"];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("UserService", method)(constructor.prototype[method], method, descriptor);
