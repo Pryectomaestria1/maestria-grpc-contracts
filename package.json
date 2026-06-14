@@ -4,9 +4,17 @@
   "description": "gRPC Proto Contracts and TypeScript Generator",
   "main": "index.ts",
   "scripts": {
-    "generate": "npx protoc --plugin=protoc-gen-ts_proto=..\\backend-microservices\\review-grpc-service\\node_modules\\.bin\\protoc-gen-ts_proto.cmd --ts_proto_out=generated --ts_proto_opt=nestJs=true -I . *.proto"
+    "generate": "npx protoc --plugin=protoc-gen-ts_proto=..\\backend-microservices\\review-grpc-service\\node_modules\\.bin\\protoc-gen-ts_proto.cmd --ts_proto_out=generated --ts_proto_opt=nestJs=true -I . *.proto",
+    "check:proto": "tsx scripts/run-check-proto.ts",
+    "test": "npm run check:proto"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "rxjs": "^7.8.2"
+  }
 }

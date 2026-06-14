@@ -2,27 +2,51 @@ syntax = "proto3";
 
 package media;
 
+import "google/protobuf/timestamp.proto";
+
+// File type discriminator for the presigned URL and confirm flow.
+// FILE_TYPE_UNSPECIFIED is the proto3 zero value and is treated as invalid
+// by both client and server (returns INVALID_ARGUMENT).
+enum FileType {
+  FILE_TYPE_UNSPECIFIED = 0;
+  FILE_TYPE_COVER = 1;
+  FILE_TYPE_VIDEO = 2;
+  FILE_TYPE_RESOURCE = 3;
+}
+
 service MediaService {
-  rpc GeneratePresignedUrl (GeneratePresignedUrlRequest) returns (GeneratePresignedUrlResponse);
-  rpc ConfirmVideoUpload (ConfirmVideoUploadRequest) returns (ConfirmVideoUploadResponse);
+  // Generate a presigned PUT URL for the browser to upload directly to
+  // MinIO. Bound to the declared content type and size, expires in 900s.
+  rpc GeneratePresignedUrl (PresignedUrlRequest) returns (PresignedUrlResponse);
+
+  // Confirm that an upload actually landed at the returned key. The server
+  // runs HeadObject, validates the ownerId prefix, fans out to the catalog
+  // service (with a 5s timeout), and returns the public canonical URL.
+  rpc ConfirmUpload (ConfirmUploadRequest) returns (ConfirmUploadResponse);
 }
 
-message GeneratePresignedUrlRequest {
-  string fileName = 1;
-  string lessonId = 2;
+message PresignedUrlRequest {
+  FileType file_type = 1;
+  string owner_id = 2;
+  int64 size_bytes = 3;
+  string content_type = 4;
 }
 
-message GeneratePresignedUrlResponse {
-  string uploadUrl = 1;
+message PresignedUrlResponse {
+  string url = 1;
   string key = 2;
+  google.protobuf.Timestamp expires_at = 3;
 }
 
-message ConfirmVideoUploadRequest {
-  string lessonId = 1;
-  string key = 2;
+message ConfirmUploadRequest {
+  string key = 1;
+  string owner_id = 2;
+  FileType file_type = 3;
+  int64 size_bytes = 4;
 }
 
-message ConfirmVideoUploadResponse {
-  string status = 1;
-  string hlsUrl = 2;
+message ConfirmUploadResponse {
+  string canonical_url = 1;
+  string etag = 2;
+  google.protobuf.Timestamp last_modified = 3;
 }

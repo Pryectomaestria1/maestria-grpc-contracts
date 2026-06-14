@@ -223,29 +223,46 @@ export interface EnrollmentService {
 // Namespace: Media
 // =========================================
 
-export interface GeneratePresignedUrlRequest {
-  fileName?: string;
-  lessonId?: string;
+// File type discriminator for presign + confirm flow.
+// FILE_TYPE_UNSPECIFIED (0) is the proto3 zero value and is treated as
+// invalid by both client and server.
+export const FILE_TYPE = {
+  UNSPECIFIED: 0,
+  COVER: 1,
+  VIDEO: 2,
+  RESOURCE: 3,
+} as const;
+export type FileType = (typeof FILE_TYPE)[keyof typeof FILE_TYPE];
+
+export interface PresignedUrlRequest {
+  fileType?: FileType;
+  ownerId?: string;
+  sizeBytes?: number;
+  contentType?: string;
 }
 
-export interface GeneratePresignedUrlResponse {
-  uploadUrl?: string;
+export interface PresignedUrlResponse {
+  url?: string;
   key?: string;
+  expiresAt?: any;
 }
 
-export interface ConfirmVideoUploadRequest {
-  lessonId?: string;
+export interface ConfirmUploadRequest {
   key?: string;
+  ownerId?: string;
+  fileType?: FileType;
+  sizeBytes?: number;
 }
 
-export interface ConfirmVideoUploadResponse {
-  status?: string;
-  hlsUrl?: string;
+export interface ConfirmUploadResponse {
+  canonicalUrl?: string;
+  etag?: string;
+  lastModified?: any;
 }
 
 export interface MediaService {
-  generatePresignedUrl(request: GeneratePresignedUrlRequest): Observable<GeneratePresignedUrlResponse> | Promise<GeneratePresignedUrlResponse> | GeneratePresignedUrlResponse;
-  confirmVideoUpload(request: ConfirmVideoUploadRequest): Observable<ConfirmVideoUploadResponse> | Promise<ConfirmVideoUploadResponse> | ConfirmVideoUploadResponse;
+  generatePresignedUrl(request: PresignedUrlRequest): Observable<PresignedUrlResponse> | Promise<PresignedUrlResponse> | PresignedUrlResponse;
+  confirmUpload(request: ConfirmUploadRequest): Observable<ConfirmUploadResponse> | Promise<ConfirmUploadResponse> | ConfirmUploadResponse;
 }
 
 // =========================================
